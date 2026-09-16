@@ -1,28 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Plane, Radar, BellRing, CalendarX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Flight Price Notifier — 機票降價通知" },
-      {
-        name: "description",
-        content:
-          "設定航線與目標價，機票降價就通知你。Set a route and a target price — we email you when the fare drops.",
-      },
-      { property: "og:title", content: "Flight Price Notifier — 機票降價通知" },
-      {
-        property: "og:description",
-        content: "Set a route and a target price — we email you when the fare drops.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: LandingPage,
-});
 
 const features = [
   {
@@ -45,7 +24,7 @@ const features = [
   },
 ];
 
-function LandingPage() {
+export default function LandingPage() {
   const navigate = useNavigate();
   const [signedIn, setSignedIn] = useState(false);
 
@@ -70,6 +49,7 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <title>Flight Price Notifier — 機票降價通知</title>
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -78,7 +58,7 @@ function LandingPage() {
             <span>Flight Price Notifier</span>
           </Link>
           <button
-            onClick={() => navigate({ to: signedIn ? "/app" : "/auth" })}
+            onClick={() => navigate(signedIn ? "/app" : "/sign-in")}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-glow transition-colors hover:bg-primary/90"
           >
             {signedIn ? "前往儀表板" : "Sign in / 登入"}
@@ -112,7 +92,7 @@ function LandingPage() {
           </p>
           <div className="animate-fade-up mt-10" style={{ animationDelay: "300ms" }}>
             <button
-              onClick={() => navigate({ to: signedIn ? "/app" : "/auth" })}
+              onClick={() => navigate(signedIn ? "/app" : "/sign-in")}
               className="rounded-xl bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-xl shadow-glow transition-all hover:bg-primary/90 hover:shadow-glow"
             >
               {signedIn ? "前往儀表板" : "Sign in / 登入"}

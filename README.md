@@ -60,11 +60,20 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+This is a client-side single-page app built with Vite + React + React Router (no SSR).
 
 ```sh
 git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+cd fare-finder
+bun install   # or: npm install
+bun run dev   # or: npm run dev
 ```
+
+Routes: `/` (landing), `/sign-in`, `/sign-up`, `/app` (requires sign-in).
+
+## Build & deploy (Vercel)
+
+`vite build` outputs static files to `dist/`. `vercel.json` rewrites every path to
+`/index.html`, so deep links like `/app` resolve on the client.
+
+Required environment variables (build time): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.

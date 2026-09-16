@@ -1,34 +1,27 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Plane } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Sign in — Flight Price Notifier" },
-      { name: "description", content: "Sign in or create an account to track flight prices." },
-      { property: "og:title", content: "Sign in — Flight Price Notifier" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  component: AuthPage,
-});
+type AuthMode = "sign-in" | "sign-up";
 
-function AuthPage() {
+export default function AuthPage({ mode }: { mode: AuthMode }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
+  // Clear any error when switching between /sign-in and /sign-up.
+  useEffect(() => {
+    setError(null);
+  }, [mode]);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
-        navigate({ to: "/app", replace: true });
+        navigate("/app", { replace: true });
       } else {
         setChecking(false);
       }
@@ -52,7 +45,7 @@ function AuthPage() {
         setError(error.message);
         return;
       }
-      navigate({ to: "/app" });
+      navigate("/app");
     } finally {
       setLoading(false);
     }
@@ -68,6 +61,9 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <title>
+        {mode === "sign-in" ? "Sign in — Flight Price Notifier" : "Sign up — Flight Price Notifier"}
+      </title>
       <header className="border-b border-border/60">
         <div className="mx-auto flex h-16 max-w-6xl items-center px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
@@ -84,8 +80,8 @@ function AuthPage() {
               <button
                 key={m}
                 onClick={() => {
-                  setMode(m);
                   setError(null);
+                  navigate(`/${m}`, { replace: true });
                 }}
                 className={`rounded-md py-2 text-sm font-medium transition-colors ${
                   mode === m

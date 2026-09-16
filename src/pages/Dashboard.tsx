@@ -1,23 +1,20 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouteLoaderData } from "react-router";
 import { Plane, LogOut, Compass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Route as AuthLayoutRoute } from "./route";
+import type { AuthenticatedLoaderData } from "@/router";
 
-export const Route = createFileRoute("/_authenticated/app")({
-  component: DashboardPage,
-});
-
-function DashboardPage() {
+export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user } = AuthLayoutRoute.useRouteContext();
+  const { user } = useRouteLoaderData("authenticated") as AuthenticatedLoaderData;
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    navigate({ to: "/", replace: true });
+    navigate("/", { replace: true });
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <title>Dashboard — Flight Price Notifier</title>
       <header className="border-b border-border/60">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">

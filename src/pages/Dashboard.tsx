@@ -9,7 +9,7 @@ const API_URL = (
   import.meta.env["VITE_FLIGHT_API_URL"] ?? "https://r77h3r4jv7.execute-api.ap-southeast-1.amazonaws.com"
 ).replace(/\/$/, "");
 
-type PlanName = "tokyo" | "seoul";
+type PlanName = "tokyo" | "seoul" | "london";
 
 type Plan = {
   name: PlanName;
@@ -30,6 +30,7 @@ type Subscription = {
 const PLANS: Plan[] = [
   { name: "tokyo", label: "台北 ✈ 東京", route: "TPE-TYO", hint: 9325 },
   { name: "seoul", label: "台北 ✈ 首爾", route: "TPE-SEL", hint: 5989 },
+  { name: "london", label: "台北 ✈ 倫敦", route: "TPE-LON", hint: 20353 },
 ];
 
 const twd = (n: number) => `NT$${n.toLocaleString("zh-TW")}`;
@@ -101,7 +102,7 @@ export default function DashboardPage() {
         )}
 
         <div
-          className="animate-fade-up mt-8 grid gap-6 sm:grid-cols-2"
+          className="animate-fade-up mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           style={{ animationDelay: "120ms" }}
         >
           {PLANS.map((plan) => (

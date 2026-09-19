@@ -196,6 +196,7 @@ function PlanCard({
   const [value, setValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const status = statusOf(subscription);
   // active / cancelled-in-grace are already paid for: changing the target price is an
@@ -256,6 +257,39 @@ function PlanCard({
       return;
     }
     await submit(price);
+  }
+
+  // Cancel stops future ECPay charges but keeps service until current_period_end,
+  // so the row goes to `cancelled` (a grace state), never straight to `expired`.
+  async function cancel() {
+    setSaving(true);
+    setError(null);
+    try {
+      const r = await fetch(`${API_URL}/cancel`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, route: plan.route }),
+      });
+      const data = (await r.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        subscription_status?: SubStatus;
+        current_period_end_date?: string;
+      };
+      if (!r.ok || !data.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      onSaved({
+        ...(subscription as Subscription),
+        subscription_status: data.subscription_status ?? "cancelled",
+        ...(data.current_period_end_date
+          ? { current_period_end_date: data.current_period_end_date }
+          : {}),
+      });
+      setConfirmCancel(false);
+    } catch {
+      setError("取消失敗，請稍後再試。");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -361,6 +395,42 @@ function PlanCard({
               >
                 更新目標價
               </button>
+
+              {status === "active" &&
+                (confirmCancel ? (
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-xs text-muted-foreground">
+                      取消後不會再扣款
+                      {subscription?.current_period_end_date
+                        ? `，但到 ${subscription.current_period_end_date} 之前仍會收到降價通知。`
+                        : "，本期結束前仍會收到降價通知。"}
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={cancel}
+                        disabled={saving}
+                        className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-destructive px-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
+                      >
+                        {saving && <Loader2 className="size-4 animate-spin" />}
+                        確定取消
+                      </button>
+                      <button
+                        onClick={() => setConfirmCancel(false)}
+                        className="h-10 rounded-lg border border-border px-3 text-sm font-medium hover:bg-accent"
+                      >
+                        不要
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmCancel(true)}
+                    className="h-11 rounded-lg px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent"
+                  >
+                    取消訂閱
+                  </button>
+                ))}
+
               {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
           )}
